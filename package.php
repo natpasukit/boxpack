@@ -1,15 +1,13 @@
 <?php
 class Packing{
-
     public $boxList = array();
     public $itemList = array();
     public $ToWeight = null; // total weight of all item in list
     public $BoxToMaxWeight = null; // total weight of all box in list
     public $boxIsSorted = false;
-    public $itemIsSorted = false;
+    public $itemIsSorted = false;  
+    // error and result handle , temp may change ? 
     public $error = null;
-
-    // temp may change ?
     public $lastResult = null;
 
     public function getBoxlist() {
@@ -34,7 +32,6 @@ class Packing{
 
     public function placeItemSingleBox(){
         //Place all item in list into singlebox
-
         // Check and sort item and box
         if(!$this->itemIsSorted){
             $this->sortItemWeight();
@@ -114,7 +111,7 @@ Test <br>
 <?php
     //Usage test
     $package = new Packing();
-    $package->addBox("GreenBox",40,50,50,50);
+    $package->addBox("GreenBox",246,50,50,50);
     //$package->addBox("RedBox",30,50,50,50);
     //$package->addBox("YellowBox",60,50,50,50);
     //$package->addBox("BlueBox",50,50,50,50);
@@ -130,7 +127,7 @@ Test <br>
     echo "<br>";
 
     echo $package->getToWeight();
-
+    
     // try sorting
     echo "<br>";
     //$temp = $package->getBoxlist();

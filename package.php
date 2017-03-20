@@ -93,38 +93,45 @@ class Packing{
         // unfinished
         $boxcount = count($boxlist);
         $itemcount = count($itemlist);
-        return $packedBox;
-    }
-
-
-    public function placeItemSingleBox(){
-        //Place all item in list into singlebox
-        // Check and sort item and box
-        if(!$this->itemIsSorted){
-            $this->sortItemWeight();
-            $this->itemIsSorted = true;
-        }
-        if(!$this->boxIsSorted){
-            $this->sortItemWeight();
-            $this->boxIsSorted = true;
-        }
-        if(count($this->boxList)==1){
-            $this->getToWeight();
-            $this->getToBoxMaxWeight();
-            if($this->BoxToMaxWeight > 0){
-                if($this->BoxToMaxWeight < $this->ToWeight){
-                    $this->lastResult = "The item total weight is higher box max weight";
-                    return $this->lastResult;
-                }else{
-                    $this->lastResult = "The item is fit in box by weight";
-                    return $this->lastResult;
-                }
-            }else{
-                $this->error = "Box weight isn't positive number";
+        if($boxcount>0 && $itemcount>0){
+            //check total weight heavy exception
+            if($this->getToBoxMaxWeight() < $this->getToWeight()){
+                $this->error = "All item is too heavy";
                 return $this->error;
+                }
+            // check too large item exception
+            foreach($itemlist as $itemval){
+                $itemH = $itemval['itemheight'];
+                $itemL = $itemval['itemlength'];
+                $itemW = $itemval['itemwidth'];
+                $itemMw = $itemval['itemweight'];
+                $boxWCmpCount = 0;
+                $boxSCmpCount = 0;
+                foreach($boxlist as $boxval){
+                    $boxH = $boxval['boxheight'];
+                    $boxL = $boxval['boxlength'];
+                    $boxW = $boxval['boxwidth'];
+                    $boxMw = $boxval['maxweight'];
+                    // check too heavy item exception
+                    if($itemMw>$boxMw){
+                        $boxWCmpCount += 1;
+                        if($boxWCmpCount == $boxcount){
+                            $this->error = "some item is too heavy";
+                            return $this->error;
+                        }
+                    }
+                    if( $itemH > $boxH || $itemH > $boxL || $itemH > $boxW || $itemL > $boxH || $itemL > $boxL || $itemL > $boxW || $itemW > $boxH || $itemW > $boxL || $itemW > $boxW){//stupid bruteforce check using nested later??
+                        $boxSCmpCount += 1;
+                        if($boxSCmpCount == $boxcount){
+                            $this->error = "some item can't fit in all boxes";
+                            return $this->error;
+                        }
+                    }
+                }
             }
+            return "success";
         }else{
-            $this->error = "Box number isn't 1";
+            $this->error = "The item or box is lower than 1";
             return $this->error;
         }
     }
@@ -137,21 +144,23 @@ Test <br>
     //Usage test
     $package = new Packing();
     $package->addBox("GreenBox",246,50,50,50);
-    //$package->addBox("RedBox",30,50,50,50);
+    $package->addBox("RedBox",30,50,50,50);
     //$package->addBox("YellowBox",60,50,50,50);
     //$package->addBox("BlueBox",50,50,50,50);
     //$package->addBox("GreyBox",40,50,50,50);
     print_r($package->getBoxlist());
     echo "<br>";
 
-    $package->addItem("item1",10,10,20,30,2);
+    $package->addItem("item1",21,10,20,30,2);
     $package->addItem("item2",5,5,10,20,4);
     $package->addItem("item3",1,3,4,7,5);
     $package->addItem("item4",100,1,5,10,2);
     print_r($package->getItemlist());
     echo "<br>";
 
-    echo $package->getToWeight();
+    echo $package->getToBoxMaxWeight();
+    echo "<br>";
+    echo $package->getToWeight();    
     
     // try sorting
     echo "<br>";
@@ -160,5 +169,8 @@ Test <br>
     //    return $a['maxweight'] < $b['maxweight'];
     //});
     //var_dump($temp);
-    //echo $package->placeItemSingleBox();
+    echo $package->insertItem2Box($package->getBoxlist(),$package->getItemlist());
+    echo "<br>";
+    $package->addItem("item5",1,100,5,10,2);
+    echo $package->insertItem2Box($package->getBoxlist(),$package->getItemlist());
 ?>

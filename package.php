@@ -21,45 +21,15 @@ class Packing{
     public function addBox($name,$weightLimit,$boxHeight,$boxLength,$boxWidth){
         $this->boxList[] = array("boxname"=>$name , "maxweight"=>$weightLimit,"boxheight"=>$boxHeight,"boxlength"=>$boxLength,"boxwidth"=>$boxWidth,"boxvolume"=>$this->getBoxVolume($boxHeight,$boxLength,$boxWidth));
         $this->boxIsSorted = false;
-        $this->sortBoxWeight();
+        //$this->sortBoxWeight();
+        $this->sortBoxVolume();
     }
 
     public function addItem($name,$weight,$itemHeight,$itemLength,$itemWidth,$qty){
         $this->itemList[] = array("itemname"=>$name,"itemweight"=>$weight,"itemheight"=>$itemHeight,"itemlength"=>$itemLength,"itemwidth"=>$itemWidth,"itemquantity"=>$qty,"itemvolume"=>$this->getItemVolume($itemHeight,$itemLength,$itemWidth));
         $this->itemIsSorted = false;
-        $this->sortItemWeight();
-    }
-
-    public function placeItemSingleBox(){
-        //Place all item in list into singlebox
-        // Check and sort item and box
-        if(!$this->itemIsSorted){
-            $this->sortItemWeight();
-            $this->itemIsSorted = true;
-        }
-        if(!$this->boxIsSorted){
-            $this->sortItemWeight();
-            $this->boxIsSorted = true;
-        }
-        if(count($this->boxList)==1){
-            $this->getToWeight();
-            $this->getToBoxMaxWeight();
-            if($this->BoxToMaxWeight > 0){
-                if($this->BoxToMaxWeight < $this->ToWeight){
-                    $this->lastResult = "The item total weight is higher box max weight";
-                    return $this->lastResult;
-                }else{
-                    $this->lastResult = "The item is fit in box by weight";
-                    return $this->lastResult;
-                }
-            }else{
-                $this->error = "Box weight isn't positive number";
-                return $this->error;
-            }
-        }else{
-            $this->error = "Box number isn't 1";
-            return $this->error;
-        }
+        //$this->sortItemWeight();
+        $this->sortItemVolume();
     }
 
     public function getToWeight(){  // Toweight of all items
@@ -94,6 +64,21 @@ class Packing{
         //var_dump($temp);
     }
 
+    public function sortBoxVolume(){
+        usort($this->boxList, function ($boxA, $boxB) {
+            return $boxA['boxvolume'] < $boxB['boxvolume'];
+        });
+        $this->boxIsSorted = true;
+    }
+
+    public function sortItemVolume(){
+        usort($this->itemList, function ($itemA, $itemB) {
+            return ($itemA['itemvolume'] < $itemB['itemvolume']);
+        });
+        $this->itemIsSorted = true;
+        //var_dump($temp);
+    }
+
     public function getItemVolume($itemHeight,$itemLength,$itemWidth){
         $itemVol = $itemHeight * $itemLength * $itemWidth;
         return $itemVol;
@@ -102,6 +87,46 @@ class Packing{
     public function getBoxVolume($boxHeight,$boxLength,$boxWidth){
         $boxVol = $boxHeight * $boxLength * $boxWidth;
         return $boxVol;
+    }
+
+    public function insertItem2Box($boxlist,$itemlist){
+        // unfinished
+        $boxcount = count($boxlist);
+        $itemcount = count($itemlist);
+        return $packedBox;
+    }
+
+
+    public function placeItemSingleBox(){
+        //Place all item in list into singlebox
+        // Check and sort item and box
+        if(!$this->itemIsSorted){
+            $this->sortItemWeight();
+            $this->itemIsSorted = true;
+        }
+        if(!$this->boxIsSorted){
+            $this->sortItemWeight();
+            $this->boxIsSorted = true;
+        }
+        if(count($this->boxList)==1){
+            $this->getToWeight();
+            $this->getToBoxMaxWeight();
+            if($this->BoxToMaxWeight > 0){
+                if($this->BoxToMaxWeight < $this->ToWeight){
+                    $this->lastResult = "The item total weight is higher box max weight";
+                    return $this->lastResult;
+                }else{
+                    $this->lastResult = "The item is fit in box by weight";
+                    return $this->lastResult;
+                }
+            }else{
+                $this->error = "Box weight isn't positive number";
+                return $this->error;
+            }
+        }else{
+            $this->error = "Box number isn't 1";
+            return $this->error;
+        }
     }
 }
 ?>
@@ -119,10 +144,10 @@ Test <br>
     print_r($package->getBoxlist());
     echo "<br>";
 
-    $package->addItem("item1",10,50,50,50,2);
-    $package->addItem("item2",5,50,50,50,4);
-    $package->addItem("item3",1,50,50,50,5);
-    $package->addItem("item4",100,50,50,50,2);
+    $package->addItem("item1",10,10,20,30,2);
+    $package->addItem("item2",5,5,10,20,4);
+    $package->addItem("item3",1,3,4,7,5);
+    $package->addItem("item4",100,1,5,10,2);
     print_r($package->getItemlist());
     echo "<br>";
 
@@ -135,5 +160,5 @@ Test <br>
     //    return $a['maxweight'] < $b['maxweight'];
     //});
     //var_dump($temp);
-    echo $package->placeItemSingleBox();
+    //echo $package->placeItemSingleBox();
 ?>
